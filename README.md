@@ -41,7 +41,7 @@ GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
 ## Notes
 
-Describe any challenges encountered while building the app.
+- Had trouble setting up Pods. My ruby was outdated and ran into a lot of package issues :X
 
 ## License
 
