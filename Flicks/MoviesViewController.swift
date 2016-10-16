@@ -84,8 +84,6 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         cell.overViewLabel.text = overview
         
         
-        
-        
         if let posterURL = movie["poster_path"] as? String {
             let baseURL = "https://image.tmdb.org/t/p/w500"
             let imageURL = URL(string: baseURL + posterURL)
