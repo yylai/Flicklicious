@@ -14,6 +14,7 @@ import MBProgressHUD
 class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     @IBOutlet weak var movieTableView: UITableView!
+    @IBOutlet weak var errorView: UIView!
     
     
     
@@ -32,30 +33,14 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         refreshControl.addTarget(self, action: #selector(self.refreshControlAction(refreshControl:)), for: .valueChanged)
         movieTableView.insertSubview(refreshControl, at: 0)
         
+        errorView.isHidden = true
+        
         movieTableView.dataSource = self
         movieTableView.delegate = self
         
-        let url = URL(string:"\(rootUrl)\(endPoint)?api_key=\(apiKey)")
-        let request = URLRequest(url: url!)
-        let session = URLSession(
-            configuration: URLSessionConfiguration.default,
-            delegate:nil,
-            delegateQueue:OperationQueue.main
-        )
+        let movieURL = "\(rootUrl)\(endPoint)?api_key=\(apiKey)"
         
-        MBProgressHUD.showAdded(to: self.view, animated: true)
-        
-        let task : URLSessionDataTask = session.dataTask(with: request,completionHandler: { (dataOrNil, response, error) in
-            if let data = dataOrNil {
-                if let responseDictionary = try! JSONSerialization.jsonObject(with: data, options:[]) as? NSDictionary {
-                    NSLog("response: \(responseDictionary)")
-                    self.movies = responseDictionary["results"] as! [NSDictionary]
-                    self.movieTableView.reloadData()
-                    MBProgressHUD.hide(for: self.view, animated: true)
-                }
-            }
-        });
-        task.resume()
+        fetchMovies(from: movieURL, refresher: nil, successCallback: self.reloadMovies, errorCallback: self.handleNetworkError)
     }
 
     override func didReceiveMemoryWarning() {
@@ -98,25 +83,29 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     
     func refreshControlAction(refreshControl: UIRefreshControl) {
         
-        let url = URL(string:"\(rootUrl)\(endPoint)?api_key=\(apiKey)")
-        let request = URLRequest(url: url!)
-        let session = URLSession(
-            configuration: URLSessionConfiguration.default,
-            delegate:nil,
-            delegateQueue:OperationQueue.main
-        )
-
+        let movieURL = "\(rootUrl)\(endPoint)?api_key=\(apiKey)"
         
-        let task : URLSessionDataTask = session.dataTask(with: request,completionHandler: { (dataOrNil, response, error) in
-            if let data = dataOrNil {
-                if let responseDictionary = try! JSONSerialization.jsonObject(with: data, options:[]) as? NSDictionary {
-                    self.movies = responseDictionary["results"] as! [NSDictionary]
-                    self.movieTableView.reloadData()
-                    refreshControl.endRefreshing()
-                }
-            }
-        });
-        task.resume()
+        fetchMovies(from: movieURL, refresher: refreshControl, successCallback: self.reloadMovies, errorCallback: self.handleNetworkError)
+        
+//        let url = URL(string:"\(rootUrl)\(endPoint)?api_key=\(apiKey)")
+//        let request = URLRequest(url: url!)
+//        let session = URLSession(
+//            configuration: URLSessionConfiguration.default,
+//            delegate:nil,
+//            delegateQueue:OperationQueue.main
+//        )
+//
+//        
+//        let task : URLSessionDataTask = session.dataTask(with: request,completionHandler: { (dataOrNil, response, error) in
+//            if let data = dataOrNil {
+//                if let responseDictionary = try! JSONSerialization.jsonObject(with: data, options:[]) as? NSDictionary {
+//                    self.movies = responseDictionary["results"] as! [NSDictionary]
+//                    self.movieTableView.reloadData()
+//                    refreshControl.endRefreshing()
+//                }
+//            }
+//        });
+//        task.resume()
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -131,25 +120,51 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
     }
     
-//    private let params = ["api-key": "53eb9541b4374660d6f3c0001d6249ca:19:70900879"]
-//    private let resourceUrl = "http://api.nytimes.com/svc/topstories/v1/home.json"
-//    class func fetchStories(successCallback: ([Story]) -> Void, error: ((NSError?) -> Void)?) {
-//        let manager = AFHTTPRequestOperationManager()
-//        manager.GET(resourceUrl, parameters: params, success: { (operation ,responseObject) -> Void in
-//            if let results = responseObject["results"] as? NSArray {
-//                var stories: [Story] = []
-//                for result in results as [NSDictionary] {
-//                    stories.append(Story(jsonResult: result))
-//                }
-//                successCallback(stories)
-//            }
-//            }, failure: { (operation, requestError) -> Void in
-//                if let errorCallback = error? {
-//                    errorCallback(requestError)
-//                }
-//        })
-//    }
-
-
+    func reloadMovies(with movies: [NSDictionary]) {
+        self.movies = movies
+        self.movieTableView.reloadData()
+    }
+    
+    func handleNetworkError(error: Error) {
+        errorView.isHidden = false
+    }
+    
+    func fetchMovies(from url: String, refresher: UIRefreshControl?, successCallback: ([NSDictionary]) -> Void, errorCallback: ((Error) -> Void)?) {
+        
+        let movieURL = URL(string: url)
+        let request = URLRequest(url: movieURL!)
+        let session = URLSession(
+            configuration: URLSessionConfiguration.default,
+            delegate:nil,
+            delegateQueue:OperationQueue.main
+        )
+        
+        //Network error by icon 54 from the Noun Project
+        
+        MBProgressHUD.showAdded(to: self.view, animated: true)
+        
+        let task : URLSessionDataTask = session.dataTask(with: request,completionHandler: { (dataOrNil, response, errorOrNil) in
+            if let requestError = errorOrNil {
+                errorCallback?(requestError)
+                
+            } else {
+            if let data = dataOrNil {
+                if let responseDictionary = try! JSONSerialization.jsonObject(with: data, options:[]) as? NSDictionary {
+                    NSLog("response: \(responseDictionary)")
+                    let movies = responseDictionary["results"] as! [NSDictionary]
+                    self.reloadMovies(with: movies)
+                    self.errorView.isHidden = true
+                }
+            }
+            }
+            
+            MBProgressHUD.hide(for: self.view, animated: true)
+            if let refresh = refresher {
+                refresh.endRefreshing()
+            }
+        });
+        
+        task.resume()
+    }
 }
 
