@@ -32,7 +32,7 @@ Here's a walkthrough of implemented user stories:
 
 ### Required
 #### View a list of movies, view movie details, pull to refresh
-<img src='https://github.com/yylai/Flicklicious/blob/master/flick-walkthrough-error.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+<img src='https://github.com/yylai/Flicklicious/blob/master/flick-walkthrough.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
 
 #### Network error message, loading state, pull to refresh reloads page after network is restored
 <img src='https://github.com/yylai/Flicklicious/blob/master/flick-walkthrough-error.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
