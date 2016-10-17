@@ -128,6 +128,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     
     func handleNetworkError(error: Error) {
         errorView.isHidden = false
+        
     }
     
     public func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
