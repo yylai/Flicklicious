@@ -19,8 +19,8 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     
     
     var movies: [NSDictionary]?
+    var endPoint: String = "now_playing"
     let rootUrl: String = "https://api.themoviedb.org/3/movie/"
-    let endPoint: String = "now_playing"
     let apiKey: String = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
 
     
@@ -86,26 +86,6 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         let movieURL = "\(rootUrl)\(endPoint)?api_key=\(apiKey)"
         
         fetchMovies(from: movieURL, refresher: refreshControl, successCallback: self.reloadMovies, errorCallback: self.handleNetworkError)
-        
-//        let url = URL(string:"\(rootUrl)\(endPoint)?api_key=\(apiKey)")
-//        let request = URLRequest(url: url!)
-//        let session = URLSession(
-//            configuration: URLSessionConfiguration.default,
-//            delegate:nil,
-//            delegateQueue:OperationQueue.main
-//        )
-//
-//        
-//        let task : URLSessionDataTask = session.dataTask(with: request,completionHandler: { (dataOrNil, response, error) in
-//            if let data = dataOrNil {
-//                if let responseDictionary = try! JSONSerialization.jsonObject(with: data, options:[]) as? NSDictionary {
-//                    self.movies = responseDictionary["results"] as! [NSDictionary]
-//                    self.movieTableView.reloadData()
-//                    refreshControl.endRefreshing()
-//                }
-//            }
-//        });
-//        task.resume()
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -116,7 +96,6 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         let detailViewController = segue.destination as! DetailViewController
         
         detailViewController.movie = movie
-        
         
     }
     
@@ -150,7 +129,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
             } else {
             if let data = dataOrNil {
                 if let responseDictionary = try! JSONSerialization.jsonObject(with: data, options:[]) as? NSDictionary {
-                    NSLog("response: \(responseDictionary)")
+                    //NSLog("response: \(responseDictionary)")
                     let movies = responseDictionary["results"] as! [NSDictionary]
                     self.reloadMovies(with: movies)
                     self.errorView.isHidden = true
