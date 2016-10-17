@@ -41,6 +41,7 @@ GIF created with [LiceCap](http://www.cockos.com/licecap/).
 ## Notes
 
 - Had trouble setting up Pods. My ruby was outdated and ran into a lot of package issues :X
+- Still have trouble with creating and using icons on the tab bar. Can't seem to set the background color of tab bar and can't get the icon to use template mode (had to resort to use original image)
 
 ## License
 
