@@ -2,7 +2,7 @@
 
 **Flicklicious** is a movies app using the [The Movie Database API](http://docs.themoviedb.apiary.io/#).
 
-Time spent: **12** hours spent in total
+Time spent: **14** hours spent in total
 
 ## User Stories
 
@@ -18,7 +18,7 @@ The following **optional** features are implemented:
 
 - [x] Add a tab bar for **Now Playing** and **Top Rated** movies.
 - [ ] Implement segmented control to switch between list view and grid view.
-- [ ] Add a search bar.
+- [x] Add a search bar.
 - [ ] All images fade in.
 - [ ] For the large poster, load the low-res image first, switch to high-res when complete.
 - [ ] Customize the highlight and selection effect of the cell.
@@ -26,11 +26,12 @@ The following **optional** features are implemented:
 
 The following **additional** features are implemented:
 
+
 ## Video Walkthrough
 
 Here's a walkthrough of implemented user stories:
 
-### View a list of movies, view movie details, pull to refresh, tab bar for now playing and top rated
+### View a list of movies, view movie details, pull to refresh, tab bar for now playing and top rated, search
 <img src='https://github.com/yylai/Flicklicious/blob/master/flick-walkthrough.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
 
 ### Network error message, loading state, pull to refresh reloads page after network is restored
