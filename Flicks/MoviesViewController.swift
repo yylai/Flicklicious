@@ -11,14 +11,16 @@ import AFNetworking
 import MBProgressHUD
 
 
-class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate {
     
     @IBOutlet weak var movieTableView: UITableView!
     @IBOutlet weak var errorView: UIView!
-    
+    @IBOutlet weak var searchBar: UISearchBar!
     
     
     var movies: [NSDictionary]?
+    var filteredMovies:[NSDictionary]?
+    var isSearching: Bool = false
     var endPoint: String = "now_playing"
     let rootUrl: String = "https://api.themoviedb.org/3/movie/"
     let apiKey: String = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
@@ -33,10 +35,15 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         refreshControl.addTarget(self, action: #selector(self.refreshControlAction(refreshControl:)), for: .valueChanged)
         movieTableView.insertSubview(refreshControl, at: 0)
         
+        searchBar.placeholder = "Search movie title.."
+        searchBar.delegate = self
+        
         errorView.isHidden = true
         
         movieTableView.dataSource = self
         movieTableView.delegate = self
+        
+        
         
         let movieURL = "\(rootUrl)\(endPoint)?api_key=\(apiKey)"
         
@@ -49,27 +56,42 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     }
     
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        
+        if (isSearching) {
+            if let filtered = filteredMovies {
+                return filtered.count
+            } else {
+            return 0
+            }
+        }
+        
         if let movies = movies {
             return movies.count
         } else {
             return 0
         }
-        
+    
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "MovieCell", for: indexPath) as! MovieViewCell
         
-        let movie = movies![indexPath.row]
-        let title = movie["title"] as! String
-        let overview = movie["overview"] as! String
+        var movie: NSDictionary?
+        if isSearching {
+            movie = filteredMovies![indexPath.row]
+        } else {
+            movie = movies![indexPath.row]
+        }
+        
+        let title = movie!["title"] as! String
+        let overview = movie!["overview"] as! String
         
         
         cell.titleLabel.text = title
         cell.overViewLabel.text = overview
         
         
-        if let posterURL = movie["poster_path"] as? String {
+        if let posterURL = movie!["poster_path"] as? String {
             let baseURL = "https://image.tmdb.org/t/p/w500"
             let imageURL = URL(string: baseURL + posterURL)
             cell.posterImageView.setImageWith(imageURL!)
@@ -108,6 +130,44 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         errorView.isHidden = false
     }
     
+    public func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        
+        if searchText == "" {
+            filteredMovies = movies!
+        } else {
+            filteredMovies = movies!.filter({ (movie) -> Bool in
+                let currentTitle = movie["title"] as! String
+                let range = currentTitle.range(of: searchText, options: .caseInsensitive)
+                return range != nil
+            })
+        }
+        
+        self.movieTableView.reloadData()
+    }
+    
+    public func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        isSearching = true
+    }
+    
+    public func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        
+        searchBar.text = nil
+        searchBar.setShowsCancelButton(false, animated: true)
+        isSearching = false
+        // Remove focus from the search bar.
+        searchBar.endEditing(true)
+    }
+    
+    public func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        isSearching = true
+        searchBar.setShowsCancelButton(true, animated: true)
+    }
+    
+    public func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        self.movieTableView.reloadData()
+    }
+    
+    
     func fetchMovies(from url: String, refresher: UIRefreshControl?, successCallback: ([NSDictionary]) -> Void, errorCallback: ((Error) -> Void)?) {
         
         let movieURL = URL(string: url)
@@ -117,8 +177,6 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
             delegate:nil,
             delegateQueue:OperationQueue.main
         )
-        
-        //Network error by icon 54 from the Noun Project
         
         MBProgressHUD.showAdded(to: self.view, animated: true)
         
