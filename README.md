@@ -31,7 +31,7 @@ The following **additional** features are implemented:
 
 Here's a walkthrough of implemented user stories:
 
-### View a list of movies, view movie details, pull to refresh, tab bar, search, image fade, low res to high res
+### View a list of movies, view movie details, loading state, pull to refresh, tab bar, search, image fade, low res to high res
 <img src='https://github.com/yylai/Flicklicious/blob/master/flick-walkthrough.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
 
 ### Network error message, loading state, pull to refresh reloads page after network is restored
