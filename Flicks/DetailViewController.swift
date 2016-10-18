@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AFNetworking
 
 class DetailViewController: UIViewController {
 
@@ -36,9 +37,39 @@ class DetailViewController: UIViewController {
         overviewLabel.sizeToFit()
         
         if let posterURL = movie["poster_path"] as? String {
-            let baseURL = "https://image.tmdb.org/t/p/w500"
-            let imageURL = URL(string: baseURL + posterURL)
-            posterImageView.setImageWith(imageURL!)
+            //let baseURL = "https://image.tmdb.org/t/p/w500"
+            
+            let lowImgBaseURL = "https://image.tmdb.org/t/p/w45"
+            let origImgBaseURL = "https://image.tmdb.org/t/p/original"
+            
+            let lowImgURL = URL(string: lowImgBaseURL + posterURL)
+            let origImgURL = URL(string: origImgBaseURL + posterURL)
+            
+            
+            let lowImgReq = URLRequest(url: lowImgURL!)
+            let origImgReq = URLRequest(url: origImgURL!)
+            
+            
+            posterImageView.setImageWith(lowImgReq, placeholderImage: nil, success: { (req, resp, lowImg) in
+                if let response = resp {
+                    self.posterImageView.alpha = 0
+                    self.posterImageView.image = lowImg
+                   UIView.animate(withDuration: 0.3, animations: {
+                    self.posterImageView.alpha = 1
+                    }, completion: { (success) in
+                        self.posterImageView.setImageWith(origImgReq, placeholderImage: lowImg, success: { (origReq, origResp, origImg) in
+                            self.posterImageView.image = origImg
+                            }, failure: { (origReq, origResp, origError) in
+                                self.posterImageView.image = lowImg
+                        })
+                        
+                   })
+                } else {
+                    self.posterImageView.image = lowImg
+                }
+                }, failure: { (req, resp, err) in
+                    self.posterImageView.image = nil
+            })
         }
         
     }
